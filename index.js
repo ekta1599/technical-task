@@ -7,7 +7,7 @@ const morgan = require("morgan");
 
 // const v1 = require('./v1')
 require('dotenv').config({ path : path.join(__dirname, './config/.env')})
-app.get('/get', (req,res) => {
+app.get('/', (req,res) => {
      res.send("data is working")
 })
 app.use(express.json());
