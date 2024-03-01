@@ -2,7 +2,7 @@ const cryptoJs = require("crypto-js");
 require("dotenv").config();
 
 function encrypt(text, key) {
-  if (text && key) // Check if key is defined
+  if (text && key) 
     return cryptoJs.AES.encrypt(JSON.stringify(text), key.trim()).toString();
   else
     throw new Error("Key is not provided");

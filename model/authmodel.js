@@ -7,12 +7,10 @@ let authSchema = new Schema(
     email: {
       type: String,
       default:null
-
     },
     password: {
       type: String,
       default:null
-
     },
     name:{
         type: String,
@@ -21,7 +19,10 @@ let authSchema = new Schema(
     role :{
       type : String,
       default:null
-
+    },
+    mobile: {
+      type : Number,
+      default : null
     }
   },
   {

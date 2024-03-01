@@ -1,4 +1,5 @@
 const userModel = require("../model/authmodel");
+const OTPModel = require('../model/OTPModel')
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
@@ -7,14 +8,22 @@ const { encrypt, decrypt } = require("../helper/encrypt-decrypt");
 const CryptoJS = require("crypto-js");
 
 module.exports = {
-    add: (data) => {
-        console.log("req");
+    register: (data) => {
         return new Promise(async (res, rej) => {
             try {
-                console.log("resp------------>", data);
+                let OTPcode = 1111
+                const userMobileInfo = await userModel.findOne({
+                    "mobile": data.mobile,
+                  });
+                  if(userMobileInfo){
+                    rej({ status: 400, message: "account already exists" });
+                  }
+                let createOTP = await OTPModel.create({
+                    mobile : data.mobile,
+                    otp : OTPcode
+                }) 
                 let saveData = await userModel.create(data);
-                console.log("saveData-------->", saveData);
-                if (saveData) {
+                if (saveData, createOTP) {
                     res({ status: 200, data: "New Data added!!" });
                 } else {
                     rej({ status: 500, message: "something went wrong!!........." });
@@ -37,10 +46,7 @@ module.exports = {
                 let getData = await userModel.findOne({
                     email: data.email,
                 });
-
-
                 if (getData) {
-
                     const isMatch = await CryptoJS.SHA256(
                         data.password,
                         getData.password
@@ -60,10 +66,20 @@ module.exports = {
                             process.env.USER_ACCESS_TOKEN,
                             { expiresIn: process.env.USER_ACCESS_TIME }
                         );
+                        let refreshtoken = jwt.sign(
+                            {
+                                userId: encryptUser,
+                                password: encryptPassword,
+                                role: encryptRole,
+                            },
+                            process.env.USER_REFRESH_TOKEN,
+                            { expiresIn: process.env.USER_REFRESH_TIME }
+                        );
                         res({
                             status: 200,
                             data: {
                                 token: token,
+                                refreshtoken: refreshtoken,
                                 role: getData.role,
                             },
                         });
@@ -108,17 +124,13 @@ module.exports = {
             }
         })
     },
-    getAll: (page, limit, str) => {
+    getAll: (page, limit) => {
         return new Promise(async (res, rej) => {
             try {
                 let qry = {};
                 page = parseInt(page);
                 limit = parseInt(limit);
-                if (str) {
-                    qry['$or'] = [
-                        { "name": { $regex: str, $options: 'i' } },
-                    ]
-                }
+
                 let getData = await userModel.aggregate([
                     // { $match: qry },
                     {

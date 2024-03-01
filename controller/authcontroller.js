@@ -4,7 +4,8 @@ const { response } = require("../middleware/response");
 exports.
     register = async (req, res) => {
         try {
-            let resp = await authService.add(req.body);
+            let resp = await authService.register(req.body);
+            console.log("resp",resp);
             if (resp) {
                 return response("Added successfully!!", {}, 200, res);
             } else {
